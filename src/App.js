@@ -10,13 +10,7 @@ app.get('/products', async (req, res) => {
         await products.loadProducts();
 
         const limit = req.query.limit;
-        let result;
-
-        if (limit) {
-            result = products.getProducts().slice(0, limit);
-        } else {
-            result = products.getProducts();
-        }
+        const result = limit ? products.getProducts().slice(0, limit) : products.getProducts();
 
         res.json({ products: result });
     } catch (error) {
@@ -31,7 +25,7 @@ app.get('/products/:pid', async (req, res) => {
         const pid = parseInt(req.params.pid);
         const product = products.getProductById(pid);
 
-        if (typeof product === 'object') {
+        if (product) {
             res.json({ product });
         } else {
             res.status(404).json({ error: 'Producto no encontrado' });

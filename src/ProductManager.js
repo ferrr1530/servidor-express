@@ -26,7 +26,7 @@ class ProductManager {
 
     getProductById(pid) {
         const product = this.products.find(prod => prod.id === pid);
-        return product || "Producto no encontrado";
+        return product || null; 
     }
 }
 
