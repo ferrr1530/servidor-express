@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Time Products</title>
+</head>
+<body>
+    <h1>Listado de Productos en Tiempo Real</h1>
+    <ul id="productList">
+        {{#each products}}
+            <li>{{this}}</li>
+        {{/each}}
+    </ul>
+
+    <!-- Formulario para agregar productos -->
+    <form id="productForm">
+        <label for="productName">Nombre del Producto:</label>
+        <input type="text" id="productName" name="productName" required>
+        <button type="submit">Agregar Producto</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Manejar el evento 'updateProducts' para actualizar la lista de productos
+        socket.on('updateProducts', (product) => {
+            const productList = document.getElementById('productList');
+            const listItem = document.createElement('li');
+            listItem.textContent = product;
+            productList.appendChild(listItem);
+        });
+
+        // Manejar el envío del formulario para agregar productos
+        const productForm = document.getElementById('productForm');
+        productForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const productName = document.getElementById('productName').value;
+
+            // Emitir un evento al servidor indicando que se agregó un nuevo producto
+            socket.emit('newProduct', productName);
+
+            // Limpiar el campo de entrada después de agregar el producto
+            document.getElementById('productName').value = '';
+        });
+    </script>
+</body>
+</html>
