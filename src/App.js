@@ -5,13 +5,20 @@ const socketIO = require('socket.io');
 const fs = require('fs');
 const productRouter = require('./ProductRouter');
 const cartRouter = require('./CartRouter');
-
+const mongoose = require('mongoose');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
 
 const port = 8080;
 
+mongoose.connect('mongodb+srv://<fernandocba1530>:<T3Q8Rnm437JTI0Eg>@cluster0.mongodb.net/ecommerce', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+mongoose.connection.on('error', (err) => {
+    console.error('Error de conexión a MongoDB:', err.message);
+  });
 // Configurar Handlebars
 app.engine(
     'handlebars',
@@ -74,3 +81,10 @@ app.get('/realtimeproducts', (req, res) => {
 server.listen(port, () => {
     console.log(`Servidor escuchando en http://localhost:${port}`);
 });
+
+process.on('SIGINT', () => {
+    mongoose.connection.close(() => {
+      console.log('Conexión a MongoDB cerrada');
+      process.exit(0);
+    });
+  });
