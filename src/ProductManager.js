@@ -1,33 +1,25 @@
-const fs = require('fs').promises;
+const Product = require('../models/ProductModel');
 
-class ProductManager {
-    constructor(path) {
-        this.path = path;
-        this.products = [];
-        this.loadProducts();
-    }
+const getAllProducts = async (options) => {
+  const { limit = 10, page = 1, sort, query } = options;
 
-    async loadProducts() {
-        try {
-            const data = await fs.readFile(this.path, 'utf8');
-            this.products = JSON.parse(data) || [];
-        } catch (error) {
-            this.products = [];
-        }
-    }
+  try {
+    const filter = query ? { category: query } : {};
+    const sortOptions = sort ? { price: sort === 'asc' ? 1 : -1 } : {};
 
-    async saveProducts() {
-        await fs.writeFile(this.path, JSON.stringify(this.products), 'utf8');
-    }
+    const products = await Product.find(filter)
+      .sort(sortOptions)
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
 
-    getProducts() {
-        return this.products;
-    }
+    return products;
+  } catch (error) {
+    throw error;
+  }
+};
 
-    getProductById(pid) {
-        const product = this.products.find(prod => prod.id === pid);
-        return product || null; 
-    }
-}
 
-module.exports = ProductManager;
+module.exports = {
+  getAllProducts,
+
+};
