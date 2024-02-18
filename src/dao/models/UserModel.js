@@ -7,16 +7,23 @@ const userSchema = new mongoose.Schema({
   role: { type: String, default: 'usuario' },
 });
 
+// Método para validar la contraseña
 userSchema.methods.validatePassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 
-userSchema.pre('save', function (next) {
-  if (this.isModified('password')) {
-    const salt = bcrypt.genSaltSync(10);
-    this.password = bcrypt.hashSync(this.password, salt);
+// Middleware para realizar el hash de la contraseña antes de guardar en la base de datos
+userSchema.pre('save', async function (next) {
+  try {
+    if (this.isModified('password')) {
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(this.password, saltRounds);
+      this.password = hashedPassword;
+    }
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
 });
 
 const User = mongoose.model('User', userSchema);

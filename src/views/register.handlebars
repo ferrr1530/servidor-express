@@ -4,9 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
+    <!-- Agrega tus enlaces a hojas de estilo aquí si es necesario -->
+    <style>
+        /* Agrega estilos según sea necesario */
+    </style>
 </head>
 <body>
     <h1>Registro</h1>
+    
+    <!-- Muestra mensajes de error si existen -->
+    {{#if error}}
+        <p style="color: red;">{{error}}</p>
+    {{/if}}
+
+    <!-- Muestra mensajes de éxito si existen -->
+    {{#if success}}
+        <p style="color: green;">{{success}}</p>
+    {{/if}}
     
     <form action="/auth/register" method="post">
         <label for="email">Email:</label>

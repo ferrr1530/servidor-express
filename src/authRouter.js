@@ -4,6 +4,14 @@ const User = require('../models/UserModel');
 
 const authRouter = express.Router();
 
+// Middleware para verificar autenticación
+const ensureAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/auth/login');
+};
+
 authRouter.get('/login', (req, res) => {
   // Lógica para renderizar la vista de login
   res.render('login');
@@ -33,7 +41,7 @@ authRouter.post('/register', async (req, res) => {
   }
 });
 
-authRouter.get('/logout', (req, res) => {
+authRouter.get('/logout', ensureAuthenticated, (req, res) => {
   // Lógica para cerrar sesión
   req.logout();
   res.redirect('/auth/login'); // Redirección después de cerrar sesión

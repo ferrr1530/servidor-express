@@ -4,9 +4,11 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const GitHubStrategy = require('passport-github2').Strategy;
+const jwt = require('jsonwebtoken');
+require('dotenv').config(); // Cargar variables de entorno
 
-const User = require('./models/UserModel'); // Importa el modelo de usuario
-
+const User = require('./models/UserModel');
 const productRouter = require('./routes/api/productsRouter');
 const cartsRouter = require('./routes/api/cartsRouter');
 const authRouter = require('./routes/authRouter');
@@ -50,18 +52,38 @@ passport.use(new LocalStrategy({
   }
 }));
 
+// Configurar la estrategia de GitHub de passport para el login
+passport.use(new GitHubStrategy({
+  clientID: process.env.GITHUB_CLIENT_ID,
+  clientSecret: process.env.GITHUB_CLIENT_SECRET,
+  callbackURL: 'http://localhost:3000/auth/github/callback',
+},
+async (accessToken, refreshToken, profile, done) => {
+  try {
+    let user = await User.findOne({ email: profile.emails[0].value });
+
+    if (!user) {
+      user = new User({
+        email: profile.emails[0].value,
+      });
+      await user.save();
+    }
+
+    return done(null, user);
+  } catch (error) {
+    return done(error);
+  }
+}));
+
 // Serialización y deserialización del usuario para la sesión
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  done(null, { userId: user.id, token });
 });
 
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error);
-  }
+passport.deserializeUser(async (data, done) => {
+  const user = await User.findById(data.userId);
+  done(null, user);
 });
 
 // Rutas
