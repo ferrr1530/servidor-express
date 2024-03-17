@@ -29,10 +29,10 @@ authRouter.get('/register', (req, res) => {
 
 authRouter.post('/register', async (req, res) => {
   // Lógica para registrar un nuevo usuario
-  const { email, password } = req.body;
+  const { first_name, last_name, email, age, password } = req.body;
 
   try {
-    const newUser = new User({ email, password });
+    const newUser = new User({ first_name, last_name, email, age, password });
     await newUser.save();
     res.redirect('/auth/login'); // Redirección después del registro exitoso
   } catch (error) {
